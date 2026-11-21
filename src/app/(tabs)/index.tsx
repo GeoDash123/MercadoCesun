@@ -1,8 +1,9 @@
 import { Ionicons } from "@react-native-vector-icons/ionicons";
 import { router } from "expo-router";
-import { useState, type ComponentProps } from "react";
+import { useState } from "react";
+import ProductoCard from "../../components/ProductoCard";
+
 import {
-  Image,
   Modal,
   Pressable,
   ScrollView,
@@ -12,102 +13,13 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-
-type IconName = ComponentProps<typeof Ionicons>["name"];
-
-const CATEGORIAS = [
-  "Todos",
-  "Tecnología",
-  "Libros",
-  "Material escolar",
-  "Accesorios",
-] as const;
-
-type Categoria = (typeof CATEGORIAS)[number];
-
-type Producto = {
-  id: number;
-  nombre: string;
-  precio: number;
-  categoria: Exclude<Categoria, "Todos">;
-  estado: string;
-  descripcion: string;
-  vendedor: string;
-  icono: IconName;
-  imagen?: string;
-};
-
-const ICONOS_CATEGORIAS: Record<Categoria, IconName> = {
-  Todos: "grid-outline",
-  Tecnología: "laptop-outline",
-  Libros: "book-outline",
-  "Material escolar": "school-outline",
-  Accesorios: "bag-outline",
-};
-
-// Productos simulados para desarrollar la interfaz.
-const PRODUCTOS: Producto[] = [
-  {
-    id: 1,
-    nombre: "Laptop HP",
-    precio: 3500,
-    categoria: "Tecnología",
-    estado: "Usado - Buen estado",
-    descripcion: "Laptop funcional, ideal para tareas y proyectos.",
-    vendedor: "Estudiante CESUN",
-    icono: "laptop-outline",
-  },
-  {
-    id: 2,
-    nombre: "Calculadora científica",
-    precio: 180,
-    categoria: "Material escolar",
-    estado: "Usado - Excelente estado",
-    descripcion: "Calculadora científica para clases de matemáticas.",
-    vendedor: "Estudiante CESUN",
-    icono: "calculator-outline",
-  },
-  {
-    id: 3,
-    nombre: "Libro de programación",
-    precio: 220,
-    categoria: "Libros",
-    estado: "Usado - Buen estado",
-    descripcion: "Libro introductorio de programación.",
-    vendedor: "Estudiante CESUN",
-    icono: "book-outline",
-  },
-  {
-    id: 4,
-    nombre: "Mochila escolar",
-    precio: 300,
-    categoria: "Accesorios",
-    estado: "Usado - Buen estado",
-    descripcion: "Mochila con espacio para laptop y cuadernos.",
-    vendedor: "Estudiante CESUN",
-    icono: "bag-outline",
-  },
-  {
-    id: 5,
-    nombre: "Audífonos",
-    precio: 450,
-    categoria: "Tecnología",
-    estado: "Usado - Excelente estado",
-    descripcion: "Audífonos para estudiar y escuchar música.",
-    vendedor: "Estudiante CESUN",
-    icono: "headset-outline",
-  },
-  {
-    id: 6,
-    nombre: "Paquete de cuadernos",
-    precio: 80,
-    categoria: "Material escolar",
-    estado: "Nuevo",
-    descripcion: "Cuadernos sin utilizar para diferentes materias.",
-    vendedor: "Estudiante CESUN",
-    icono: "documents-outline",
-  },
-];
+import {
+  CATEGORIAS,
+  ICONOS_CATEGORIAS,
+  PRODUCTOS,
+  type Categoria,
+  type Producto,
+} from "../../data/productos";
 
 function formatoPrecio(precio: number) {
   return precio.toLocaleString("es-MX", {
@@ -257,63 +169,15 @@ export default function Inicio() {
         </View>
 
         <View style={styles.grid}>
-          {productosFiltrados.map((producto) => {
-            const esFavorito = favoritos.includes(producto.id);
-
-            return (
-              <Pressable
-                key={producto.id}
-                style={styles.tarjeta}
-                onPress={() => setSeleccionado(producto)}
-              >
-                {/* IMAGEN O ICONO PROVISIONAL */}
-                <View style={styles.imagenContenedor}>
-                  {producto.imagen ? (
-                    <Image
-                      source={{ uri: producto.imagen }}
-                      style={styles.imagen}
-                      resizeMode="cover"
-                    />
-                  ) : (
-                    <Ionicons name={producto.icono} size={55} color="#78A99E" />
-                  )}
-
-                  <Pressable
-                    style={styles.favoritoBoton}
-                    onPress={(event) => {
-                      event.stopPropagation();
-                      cambiarFavorito(producto.id);
-                    }}
-                  >
-                    <Ionicons
-                      name={esFavorito ? "heart" : "heart-outline"}
-                      size={21}
-                      color={esFavorito ? "#E11D48" : "#475569"}
-                    />
-                  </Pressable>
-                </View>
-
-                {/* INFORMACIÓN DEL PRODUCTO */}
-                <View style={styles.tarjetaInfo}>
-                  <Text style={styles.productoNombre} numberOfLines={2}>
-                    {producto.nombre}
-                  </Text>
-
-                  <Text style={styles.productoCategoria}>
-                    {producto.categoria}
-                  </Text>
-
-                  <Text style={styles.productoPrecio}>
-                    {formatoPrecio(producto.precio)}
-                  </Text>
-
-                  <Text style={styles.productoEstado} numberOfLines={1}>
-                    {producto.estado}
-                  </Text>
-                </View>
-              </Pressable>
-            );
-          })}
+          {productosFiltrados.map((producto) => (
+            <ProductoCard
+              key={producto.id}
+              producto={producto}
+              esFavorito={favoritos.includes(producto.id)}
+              onPress={() => setSeleccionado(producto)}
+              onToggleFavorito={() => cambiarFavorito(producto.id)}
+            />
+          ))}
         </View>
 
         {productosFiltrados.length === 0 && (
